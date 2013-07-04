@@ -47,10 +47,10 @@ var PrimeFinder = (function(){
     }
 
     /**
-     * If it's not evenly disible by 1-9 it's probably a prime.
+     * If it's not evenly disible it's a prime!
      */
     function isPrime(currentNumber) {
-        for (i = 1; i < 10; i++) {
+        for (i = 1; i < currentNumber; i++) {
             if (isEvenlyDivisible(function(){ return (currentNumber % i === 0) }) === true) {
                 /**
                  * So the number is evenly divisible, therefore we should return
