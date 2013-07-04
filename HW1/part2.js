@@ -5,8 +5,7 @@
  * Finds the first 100 primes.
  */
 var PrimeFinder = (function(){
-    var primesArray = [];
-    var settings = {
+    var defaultSettings = {
         startFrom: 1,
         until: 50
     };
@@ -14,14 +13,13 @@ var PrimeFinder = (function(){
     /**
      * Handle options and application logic.
      */
-    function publicConstructor(options, outputCallback) {
-        console.log("Public Constructor!");
-        var settings = extend(settings, options);
+    var publicConstructor = function (options, outputCallback) {
+        this.settings = extend(defaultSettings, options);
 
         this.findPrimes();  /* Meat of the app */
 
         if (typeof( outputCallback ) === "function") {
-            outputCallback(primesArray, currentNumber);
+            outputCallback(this.primesArray);
         }
     }
 
@@ -29,13 +27,12 @@ var PrimeFinder = (function(){
      * Our main running function.
      */
     function findPrimes() {
-        var currentNumber = settings.startFrom;
+        var currentNumber = this.settings.startFrom;
 
-        while (primesArray.length <= settings.until) {
+        while (this.primesArray.length < this.settings.until) {
             if (isPrime( currentNumber )) {
-                primesArray.push(currentNumber);
+                this.primesArray.push(currentNumber);
             }
-
 
             currentNumber++;
         }
@@ -59,13 +56,20 @@ var PrimeFinder = (function(){
      * If it's not evenly disible it's a prime!
      */
     function isPrime(currentNumber) {
+        /**
+         * Turns out 1 is not a prime number. Learn something new everyday!
+         */
+        if (currentNumber < 2) {
+            return false;
+        }
+
         for (var i = 2; i < currentNumber; i++) {
 
-            var testLogic = function(){ 
-                return (currentNumber % i === 0);
+            var primeLogic = function(){ 
+                return (currentNumber % i === 0) === true;
             };
 
-            if (isEvenlyDivisible(testLogic) === true && curentNumber > 1) {
+            if (isEvenlyDivisible(primeLogic)) {
                 /**
                  * So the number is evenly divisible, therefore we should return
                  * false since the given number is not a prime.
@@ -96,10 +100,13 @@ var PrimeFinder = (function(){
     /**
      * Prime finder.
      */
-    function App(settings, outputCallback) {};      
+    function App(settings, outputCallback) {
+        this.init.apply(this, arguments);
+    }      
 
-    App.prototype = publicConstructor;
-    App.findPrimes = findPrimes;
+    App.prototype.init = publicConstructor;
+    App.prototype.findPrimes = findPrimes;
+    App.prototype.primesArray = [];
 
     /**
      * Expose any methods and/or properties that should be public.
@@ -112,12 +119,13 @@ var initialOptions = {
     until: 100
 };
 
-var outputCallback = function(primeNumbers, totalNumbersTested) { 
+var outputCallback = function(primeNumbers) { 
     var fs = require('fs');
     var outfile = "primes.txt";
     var out = primeNumbers.join(',');
 
-    fs.writeFileSync(outfile, out);
+    fs.writeFileSync(outfile, out + "\n");
+    console.log( out );
 };
 
 var Primes = new PrimeFinder(initialOptions, outputCallback);
